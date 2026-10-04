@@ -36,3 +36,9 @@ This document details key product design, typographic, mathematical, and interac
 ## 7. Native Accessible Form Controls
 - **The Challenge:** Custom div-based slider sliders break native keyboard navigation, mobile touch targets, and assistive technology announcements.
 - **The Decision:** Styled native `<input type="range">` elements with CSS, providing keyboard accessibility, ARIA value text attributes, and polite debounced `aria-live` announcements for real-time calculation figures.
+
+## 8. High-Contrast Typography in Callouts and Alert Blocks
+- **The Challenge:** Thin display serif fonts (`Instrument Serif`) have high stroke contrast that collapses at small sizes (`12px`–`14px`), rendering blurry or faint on tinted red, amber, and green alert backgrounds (such as the Debt Threshold Alert and Cost of Inaction blocks).
+- **The Decision:**
+  - Standardized all body text, notes, and metrics inside alert blocks and tool cards to clean, medium-weight `font-sans` (`Geist Sans`).
+  - Darkened alert copy and badges to high-contrast ink values (`#11110F` body, `#450A0A` / `text-red-950` alert headings, and high-opacity borders) ensuring crisp, effortless readability across all display types.

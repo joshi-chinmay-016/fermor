@@ -65,28 +65,28 @@ export function AffordabilityTool() {
         />
       </div>
 
-      <div className="p-3.5 bg-bg-subtle rounded border border-border/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+      <div className="p-4 bg-bg-subtle rounded border border-border flex flex-wrap items-center justify-between gap-3 text-xs">
         <div>
-          <span className="text-ink-muted block text-[11px] uppercase tracking-wider">
+          <span className="text-ink block text-xs uppercase font-bold">
             Monthly EMI Outflow
           </span>
-          <span className="text-base font-serif font-semibold text-ink">
+          <span className="text-lg font-sans font-bold text-ink block mt-0.5">
             {formatINR(emiRes.monthlyEMI)} / mo
           </span>
         </div>
         <div>
-          <span className="text-ink-muted block text-[11px] uppercase tracking-wider">
+          <span className="text-ink block text-xs uppercase font-bold">
             Total Interest Paid
           </span>
-          <span className="font-mono text-red-700 font-medium">
+          <span className="font-mono text-red-950 font-bold text-lg block mt-0.5">
             +{formatINR(emiRes.totalInterest)}
           </span>
         </div>
         <div>
-          <span className="text-ink-muted block text-[11px] uppercase tracking-wider">
+          <span className="text-ink block text-xs uppercase font-bold">
             True Acquisition Cost
           </span>
-          <span className="font-mono text-ink font-semibold">
+          <span className="font-mono text-ink font-bold text-lg block mt-0.5">
             {formatINR(downPayment + emiRes.totalRepayment)}
           </span>
         </div>

@@ -233,10 +233,10 @@ export function AskFermor() {
                   <span
                     className={`block text-xs font-bold ${
                       isStretched
-                        ? 'text-red-700'
+                        ? 'text-red-900'
                         : isHealthy
                         ? 'text-accent'
-                        : 'text-amber-800'
+                        : 'text-amber-950'
                     }`}
                   >
                     {formatPercent(totalDebtShareOfIncome)} of monthly income
@@ -246,7 +246,7 @@ export function AskFermor() {
 
               <div className="py-3 flex justify-between items-baseline">
                 <span className="text-ink font-medium">Total Interest Paid over {tenureYears} yrs</span>
-                <span className="font-mono text-red-700 font-bold tabular-nums">
+                <span className="font-mono text-red-900 font-bold tabular-nums">
                   {formatINR(emiResult.totalInterest, { compact: true })}
                 </span>
               </div>
@@ -264,19 +264,27 @@ export function AskFermor() {
             <div
               className={`p-4 rounded-sm border ${
                 isStretched
-                  ? 'bg-red-50/60 border-red-200 text-red-900'
+                  ? 'bg-red-50/95 border-red-300'
                   : isHealthy
-                  ? 'bg-accent-surface/70 border-accent/20 text-ink'
-                  : 'bg-amber-50/60 border-amber-200 text-amber-900'
+                  ? 'bg-accent-surface/90 border-accent/40'
+                  : 'bg-amber-50/95 border-amber-300'
               }`}
             >
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center gap-2 mb-2">
                 <span
-                  className={`w-2 h-2 rounded-full ${
+                  className={`w-2.5 h-2.5 rounded-full ${
                     isStretched ? 'bg-red-600' : isHealthy ? 'bg-accent' : 'bg-amber-600'
                   }`}
                 />
-                <span className="text-xs font-mono uppercase tracking-wider font-semibold">
+                <span
+                  className={`text-xs font-mono uppercase tracking-wider font-bold ${
+                    isStretched
+                      ? 'text-red-950'
+                      : isHealthy
+                      ? 'text-accent'
+                      : 'text-amber-950'
+                  }`}
+                >
                   {isStretched
                     ? 'Debt Threshold Alert'
                     : isHealthy
@@ -285,22 +293,22 @@ export function AskFermor() {
                 </span>
               </div>
 
-              <p className="text-xs sm:text-sm leading-relaxed font-serif">
+              <p className="text-sm font-sans text-ink leading-relaxed font-normal">
                 {isStretched ? (
                   <>
-                    Standalone EMI ({formatPercent(emiShareOfIncome)}) appears deceptively affordable, but
-                    your total fixed outlays reach <strong className="font-semibold">{formatPercent(totalDebtShareOfIncome)}</strong>.
+                    Standalone EMI (<strong className="font-semibold text-ink">{formatPercent(emiShareOfIncome)}</strong>) appears deceptively affordable, but
+                    your total fixed outlays reach <strong className="font-bold text-red-950 bg-red-100/90 px-1 py-0.5 rounded border border-red-200">{formatPercent(totalDebtShareOfIncome)}</strong>.
                     Many financial planners and prudent lenders consider debt servicing above 40–50% of income as stretched,
                     severely restricting your ability to invest or absorb sudden emergencies.
                   </>
                 ) : (
                   <>
-                    Your total monthly debt service sits at <strong className="font-semibold">{formatPercent(totalDebtShareOfIncome)}</strong>{' '}
+                    Your total monthly debt service sits at <strong className="font-bold text-accent bg-accent/15 px-1 py-0.5 rounded border border-accent/20">{formatPercent(totalDebtShareOfIncome)}</strong>{' '}
                     of your in-hand income, remaining well inside the standard 40% prudent guideline.
                   </>
                 )}
               </p>
-              <p className="mt-2 text-xs font-mono text-ink-muted">
+              <p className="mt-2.5 text-xs font-sans text-ink font-medium">
                 Note: 40–50% is a common benchmark rule of thumb across retail lenders, not a rigid verdict.
               </p>
             </div>

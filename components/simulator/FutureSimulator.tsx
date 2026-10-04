@@ -353,10 +353,10 @@ export function FutureSimulator() {
                 </div>
                 {deltaFormatted && (
                   <span
-                    className={`font-semibold px-2 py-0.5 rounded text-[11px] ${
+                    className={`font-bold px-2 py-0.5 rounded text-[11px] ${
                       deltaValue >= 0
-                        ? 'bg-accent-surface text-accent border border-accent/20'
-                        : 'bg-red-50 text-red-700 border border-red-200'
+                        ? 'bg-accent-surface text-accent border border-accent/30'
+                        : 'bg-red-50 text-red-950 border border-red-300'
                     }`}
                   >
                     Variance: {deltaFormatted}
@@ -377,11 +377,11 @@ export function FutureSimulator() {
             </div>
 
             {/* Generated Human-Sounding Insight */}
-            <div className="p-5 rounded-md bg-accent-surface/60 border border-accent/25">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-accent font-semibold block mb-1">
+            <div className="p-5 rounded-md bg-accent-surface/90 border border-accent/40 shadow-xs">
+              <span className="text-xs font-mono uppercase tracking-wider text-accent font-bold block mb-1.5">
                 Mathematical Takeaway
               </span>
-              <p className="text-base text-ink font-serif leading-relaxed">
+              <p className="text-base text-ink font-sans font-medium leading-relaxed">
                 &ldquo;{generatedInsight}&rdquo;
               </p>
             </div>

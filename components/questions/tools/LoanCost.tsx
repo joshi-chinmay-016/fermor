@@ -55,45 +55,45 @@ export function LoanCostTool() {
 
       {/* Main Loan Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
-        <div className="p-3 bg-bg-subtle rounded border border-border/80">
-          <span className="text-ink-muted block text-[10px] uppercase">Monthly EMI</span>
-          <span className="text-lg font-serif font-bold text-ink">
+        <div className="p-3.5 bg-bg-subtle rounded border border-border">
+          <span className="text-ink block text-xs uppercase font-bold">Monthly EMI</span>
+          <span className="text-xl font-sans font-bold text-ink block mt-1">
             {formatINR(emiRes.monthlyEMI)}
           </span>
         </div>
-        <div className="p-3 bg-bg-subtle rounded border border-border/80">
-          <span className="text-ink-muted block text-[10px] uppercase">Total Interest Outflow</span>
-          <span className="text-lg font-serif font-bold text-red-700">
+        <div className="p-3.5 bg-bg-subtle rounded border border-border">
+          <span className="text-ink block text-xs uppercase font-bold">Total Interest Outflow</span>
+          <span className="text-xl font-sans font-bold text-red-950 block mt-1">
             {formatINR(emiRes.totalInterest, { compact: true })}
           </span>
-          <span className="text-[10px] text-ink-faint block mt-0.5">
+          <span className="text-xs text-ink-muted block mt-0.5 font-medium">
             {(emiRes.interestToPrincipalRatio * 100).toFixed(0)}% of borrowed principal
           </span>
         </div>
-        <div className="p-3 bg-bg-subtle rounded border border-border/80">
-          <span className="text-ink-muted block text-[10px] uppercase">Total Cash Repaid</span>
-          <span className="text-lg font-serif font-bold text-ink">
+        <div className="p-3.5 bg-bg-subtle rounded border border-border">
+          <span className="text-ink block text-xs uppercase font-bold">Total Cash Repaid</span>
+          <span className="text-xl font-sans font-bold text-ink block mt-1">
             {formatINR(emiRes.totalRepayment, { compact: true })}
           </span>
         </div>
       </div>
 
       {/* 1% Reduction Savings Banner */}
-      <div className="p-4 bg-accent-surface rounded border border-accent/25 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+      <div className="p-4 bg-accent-surface/90 rounded border border-accent/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
         <div>
-          <span className="font-mono text-accent uppercase tracking-wider text-[11px] font-semibold block mb-0.5">
+          <span className="font-mono text-accent uppercase tracking-wider text-xs font-bold block mb-1">
             The 1% Refinance Arbitrage
           </span>
-          <p className="text-ink font-serif text-sm">
+          <p className="text-ink font-sans text-sm leading-relaxed font-normal">
             Negotiating or transferring your loan to a 1.0% lower rate ({formatPercent(rate - 0.01, 2)}) saves{' '}
-            <strong className="text-accent font-semibold">{formatINR(sensitivity.totalSavings, { compact: true })}</strong> in total interest.
+            <strong className="text-accent font-bold">{formatINR(sensitivity.totalSavings, { compact: true })}</strong> in total interest.
           </p>
         </div>
         <div className="shrink-0 text-right font-mono">
           <span className="text-accent font-bold text-base block">
             -{formatINR(sensitivity.monthlySavings)} / mo
           </span>
-          <span className="text-[10px] text-ink-muted">Lower monthly EMI</span>
+          <span className="text-[11px] text-ink font-medium">Lower monthly EMI</span>
         </div>
       </div>
     </div>

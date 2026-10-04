@@ -41,38 +41,38 @@ export function CompareTool() {
       {/* Comparisons Table */}
       <div className="overflow-x-auto border border-border rounded-sm">
         <table className="w-full text-left text-xs font-mono">
-          <thead className="bg-bg-subtle text-ink-muted border-b border-border">
+          <thead className="bg-bg-subtle text-ink border-b border-border">
             <tr>
-              <th className="py-2.5 px-3 font-medium uppercase text-[10px]">Instrument</th>
-              <th className="py-2.5 px-3 font-medium uppercase text-[10px]">Assumed Benchmark</th>
-              <th className="py-2.5 px-3 font-medium uppercase text-[10px]">Tax Status</th>
-              <th className="py-2.5 px-3 font-medium uppercase text-[10px] text-right">Projected Corpus</th>
+              <th className="py-2.5 px-3.5 font-bold uppercase text-xs text-ink">Instrument</th>
+              <th className="py-2.5 px-3.5 font-bold uppercase text-xs text-ink">Assumed Benchmark</th>
+              <th className="py-2.5 px-3.5 font-bold uppercase text-xs text-ink">Tax Status</th>
+              <th className="py-2.5 px-3.5 font-bold uppercase text-xs text-ink text-right">Projected Corpus</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/60 bg-bg-white">
+          <tbody className="divide-y divide-border/70 bg-bg-white">
             {comparisons.map((item) => (
               <tr key={item.id} className="hover:bg-bg-subtle/50 transition-colors">
-                <td className="py-2.5 px-3 font-medium font-sans text-ink">
+                <td className="py-3 px-3.5 font-bold font-sans text-sm text-ink">
                   {item.name}
-                  <span className="block text-[10px] font-mono text-ink-faint">
+                  <span className="block text-xs font-mono text-ink-muted mt-0.5 font-normal">
                     {item.volatilityNote}
                   </span>
                 </td>
-                <td className="py-2.5 px-3 text-ink">
+                <td className="py-3 px-3.5 text-sm font-semibold text-ink">
                   {formatPercent(item.assumedRate)}
                 </td>
-                <td className="py-2.5 px-3">
+                <td className="py-3 px-3.5">
                   <span
-                    className={`inline-block px-1.5 py-0.5 rounded text-[10px] ${
+                    className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${
                       item.isTaxFree
                         ? 'bg-accent-surface text-accent'
-                        : 'bg-bg-subtle text-ink-muted'
+                        : 'bg-bg-subtle text-ink border border-border'
                     }`}
                   >
                     {item.isTaxFree ? 'EEE (Tax-free)' : 'Taxable per slab'}
                   </span>
                 </td>
-                <td className="py-2.5 px-3 text-right font-semibold text-accent">
+                <td className="py-3 px-3.5 text-right font-bold text-base text-accent">
                   {formatINR(item.futureValue, { compact: true })}
                 </td>
               </tr>
@@ -81,8 +81,8 @@ export function CompareTool() {
         </table>
       </div>
 
-      <div className="p-3 bg-bg-subtle rounded text-[11px] text-ink-muted leading-relaxed">
-        <strong>Important Caveat:</strong> Returns are historical illustrative assumptions (not guaranteed).
+      <div className="p-3.5 bg-bg-subtle rounded border border-border text-xs text-ink leading-relaxed">
+        <strong className="font-semibold text-ink">Important Caveat:</strong> Returns are historical illustrative assumptions (not guaranteed).
         Equity and gold experience multi-year volatility cycles; debt instruments offer stable capital preservation.
       </div>
     </div>

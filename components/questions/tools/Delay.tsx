@@ -51,40 +51,40 @@ export function DelayTool() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
-        <div className="p-3 bg-bg-subtle rounded border border-border/80">
-          <span className="text-ink-muted block text-[10px] uppercase">Starting Today</span>
-          <span className="text-lg font-serif font-bold text-accent">
+        <div className="p-3.5 bg-bg-subtle rounded border border-border">
+          <span className="text-ink block text-xs uppercase font-bold">Starting Today</span>
+          <span className="text-xl font-sans font-bold text-accent block mt-1">
             {formatINR(delayRes.startNowFV, { compact: true })}
           </span>
-          <span className="text-[10px] text-ink-faint block mt-0.5">
+          <span className="text-xs text-ink-muted block mt-0.5 font-medium">
             Full {years} years of compounding
           </span>
         </div>
-        <div className="p-3 bg-bg-subtle rounded border border-border/80">
-          <span className="text-ink-muted block text-[10px] uppercase">
+        <div className="p-3.5 bg-bg-subtle rounded border border-border">
+          <span className="text-ink block text-xs uppercase font-bold">
             Starting in {formatYears(delayYears)}
           </span>
-          <span className="text-lg font-serif font-bold text-ink">
+          <span className="text-xl font-sans font-bold text-ink block mt-1">
             {formatINR(delayRes.startLaterFV, { compact: true })}
           </span>
-          <span className="text-[10px] text-ink-faint block mt-0.5">
+          <span className="text-xs text-ink-muted block mt-0.5 font-medium">
             Compounding for {years - delayYears} years
           </span>
         </div>
-        <div className="p-3 bg-red-50/70 rounded border border-red-200">
-          <span className="text-red-800 block text-[10px] uppercase font-semibold">
+        <div className="p-3.5 bg-red-50/95 rounded border border-red-300">
+          <span className="text-red-950 block text-xs uppercase font-bold tracking-wide">
             The Cost of Inaction
           </span>
-          <span className="text-lg font-serif font-bold text-red-700">
+          <span className="text-xl font-sans font-bold text-red-950 block mt-1">
             -{formatINR(delayRes.costOfDelay, { compact: true })}
           </span>
-          <span className="text-[10px] text-red-600 block mt-0.5">
+          <span className="text-xs text-ink block mt-0.5 font-medium">
             {formatINR(delayRes.lostCompounding, { compact: true })} lost compounding
           </span>
         </div>
       </div>
 
-      <p className="text-xs font-serif text-ink-muted leading-relaxed">
+      <p className="text-sm font-sans text-ink leading-relaxed">
         Postponing your start date by {formatYears(delayYears)} only avoids {formatINR(delayRes.missedContributions, { compact: true })} in
         deposits, but robs you of {formatINR(delayRes.costOfDelay, { compact: true })} at maturity. Time is the one leverage you cannot buy back.
       </p>

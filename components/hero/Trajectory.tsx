@@ -204,7 +204,11 @@ export function Trajectory({
                 x={padding.left + innerWidth}
                 y={y - 6}
                 textAnchor="end"
-                className="fill-[#38352F] text-xs font-mono font-medium tabular-nums"
+                fill="#11110F"
+                fontSize="11"
+                fontWeight="600"
+                fontFamily="var(--font-geist-mono), monospace"
+                className="tabular-nums"
               >
                 {formatINR(val, { compact: true })}
               </text>
@@ -319,7 +323,11 @@ export function Trajectory({
               <line y1="-18" y2="-12" stroke="#5A564C" strokeWidth="1.2" />
               <text
                 textAnchor="middle"
-                className="fill-[#2B2924] text-xs font-mono font-medium tabular-nums"
+                fill="#11110F"
+                fontSize="11"
+                fontWeight="600"
+                fontFamily="var(--font-geist-mono), monospace"
+                className="tabular-nums"
               >
                 {year === 0 ? 'Now' : `Yr ${year}`}
               </text>
