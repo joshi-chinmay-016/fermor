@@ -1,5 +1,7 @@
 # Fermor — Where is your money taking you?
 
+> **Live Production URL:** [https://fermor-homepage.netlify.app/](https://fermor-homepage.netlify.app/)
+
 Fermor is a financial clarity homepage concept designed around the foundational principle that personal finance is not a static number, but a trajectory shaped by daily and monthly decisions. Instead of static marketing copy or black-box algorithms, the interface functions as a live working model of personal finance: visitors change one parameter and immediately see how their future bends across compounding, borrowing, and inflation horizons.
 
 ---
@@ -86,4 +88,4 @@ npm run build
 npm run start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the application.
+Open [http://localhost:3000](http://localhost:3000) to view the application locally, or explore the live deployment at [https://fermor-homepage.netlify.app/](https://fermor-homepage.netlify.app/).
