@@ -3,57 +3,109 @@
 import React, { useState, useMemo } from 'react';
 import { calculateEMI } from '@/lib/calculations';
 import { formatINR, formatPercent } from '@/lib/format';
-import { ASSUMPTIONS, SCENARIO_PRESETS } from '@/lib/constants';
 import { Slider } from '../ui/Slider';
-import { AnimatedNumber } from '../ui/AnimatedNumber';
+
+interface ScenarioQuestion {
+  id: string;
+  question: string;
+  income: number;
+  commitments: number;
+  price: number;
+  downPayment: number;
+  tenureYears: number;
+  rate: number;
+  assetLabel: string;
+}
+
+const PRESET_QUESTIONS: ScenarioQuestion[] = [
+  {
+    id: 'car',
+    question: '“I earn ₹80k/month. Can I afford a ₹12L car?”',
+    income: 80000,
+    commitments: 18000,
+    price: 1200000,
+    downPayment: 200000,
+    tenureYears: 5,
+    rate: 0.095,
+    assetLabel: 'Car on-road price',
+  },
+  {
+    id: 'home',
+    question: '“I earn ₹1.5L/month. Can I buy a ₹75L home?”',
+    income: 150000,
+    commitments: 20000,
+    price: 7500000,
+    downPayment: 1500000,
+    tenureYears: 20,
+    rate: 0.0875,
+    assetLabel: 'Property agreement value',
+  },
+  {
+    id: 'education',
+    question: '“I earn ₹60k/month. Can I take an ₹8L education loan?”',
+    income: 60000,
+    commitments: 8000,
+    price: 800000,
+    downPayment: 100000,
+    tenureYears: 7,
+    rate: 0.105,
+    assetLabel: 'Course tuition & living',
+  },
+];
 
 export function AskFermor() {
-  const [activePreset, setActivePreset] = useState<string>('car');
+  const [activeScenarioId, setActiveScenarioId] = useState<string>('car');
 
   // Input states
-  const [income, setIncome] = useState<number>(ASSUMPTIONS.DEFAULT_SCENARIO.monthlyIncome);
-  const [commitments, setCommitments] = useState<number>(ASSUMPTIONS.DEFAULT_SCENARIO.existingCommitments);
-  const [assetPrice, setAssetPrice] = useState<number>(ASSUMPTIONS.DEFAULT_SCENARIO.assetPrice);
-  const [downPayment, setDownPayment] = useState<number>(ASSUMPTIONS.DEFAULT_SCENARIO.downPayment);
-  const [tenureYears, setTenureYears] = useState<number>(ASSUMPTIONS.DEFAULT_SCENARIO.tenureYears);
-  const [rate, setRate] = useState<number>(ASSUMPTIONS.DEFAULT_SCENARIO.annualInterestRate);
+  const [income, setIncome] = useState<number>(80000);
+  const [commitments, setCommitments] = useState<number>(18000);
+  const [assetPrice, setAssetPrice] = useState<number>(1200000);
+  const [downPayment, setDownPayment] = useState<number>(200000);
+  const [tenureYears, setTenureYears] = useState<number>(5);
+  const [rate, setRate] = useState<number>(0.095);
 
+  const [hasAppliedExtraDown, setHasAppliedExtraDown] = useState<boolean>(false);
   const [showMath, setShowMath] = useState<boolean>(false);
 
   // Switch preset scenarios
-  const applyPreset = (presetId: string) => {
-    const found = SCENARIO_PRESETS.find((p) => p.id === presetId);
-    if (!found) return;
-    setActivePreset(presetId);
-    setIncome(found.income);
-    setCommitments(found.commitments);
-    setAssetPrice(found.price);
-    setDownPayment(found.downPayment);
-    setTenureYears(found.tenureYears);
-    setRate(found.rate);
+  const applyScenario = (id: string) => {
+    const sc = PRESET_QUESTIONS.find((p) => p.id === id);
+    if (!sc) return;
+    setActiveScenarioId(id);
+    setIncome(sc.income);
+    setCommitments(sc.commitments);
+    setAssetPrice(sc.price);
+    setDownPayment(sc.downPayment);
+    setTenureYears(sc.tenureYears);
+    setRate(sc.rate);
+    setHasAppliedExtraDown(false);
   };
 
   // Calculations
-  const principal = Math.max(0, assetPrice - downPayment);
+  const currentDown = hasAppliedExtraDown ? downPayment + Math.min(200000, assetPrice * 0.2) : downPayment;
+  const principal = Math.max(0, assetPrice - currentDown);
+
   const emiResult = useMemo(() => {
     return calculateEMI(principal, rate, tenureYears);
   }, [principal, rate, tenureYears]);
 
-  const emiShareOfIncome = income > 0 ? emiResult.monthlyEMI / income : 0;
+  const basePrincipal = Math.max(0, assetPrice - downPayment);
+  const baseResult = useMemo(() => {
+    return calculateEMI(basePrincipal, rate, tenureYears);
+  }, [basePrincipal, rate, tenureYears]);
+
+  const emiShareOfIncome = income > 0 ? (emiResult.monthlyEMI / income) * 100 : 0;
   const totalMonthlyDebt = emiResult.monthlyEMI + commitments;
-  const totalDebtShareOfIncome = income > 0 ? totalMonthlyDebt / income : 0;
+  const totalDebtShareOfIncome = income > 0 ? (totalMonthlyDebt / income) * 100 : 0;
+  const remainingCashflow = Math.max(0, income - totalMonthlyDebt);
 
-  // Alternate scenario: what if down payment increases by ₹2 Lakhs
-  const alternateDownPayment = downPayment + Math.min(200000, assetPrice * 0.2);
-  const alternatePrincipal = Math.max(0, assetPrice - alternateDownPayment);
-  const alternateResult = useMemo(() => {
-    return calculateEMI(alternatePrincipal, rate, tenureYears);
-  }, [alternatePrincipal, rate, tenureYears]);
-  const interestSavedWithExtraDown = emiResult.totalInterest - alternateResult.totalInterest;
+  // Difference if putting extra down
+  const extraDownAmount = Math.min(200000, assetPrice * 0.2);
+  const interestSaved = baseResult.totalInterest - emiResult.totalInterest;
+  const monthlySavings = baseResult.monthlyEMI - emiResult.monthlyEMI;
 
-  // Debt strain assessment
-  const isHealthy = totalDebtShareOfIncome < ASSUMPTIONS.DTI_HEALTHY_THRESHOLD;
-  const isStretched = totalDebtShareOfIncome >= ASSUMPTIONS.DTI_STRETCH_THRESHOLD;
+  const isStretched = totalDebtShareOfIncome >= 45;
+  const isHealthy = totalDebtShareOfIncome < 35;
 
   return (
     <section id="ask-fermor" className="py-12 md:py-16 bg-bg-subtle border-b border-border">
@@ -61,55 +113,58 @@ export function AskFermor() {
         
         {/* Section Header */}
         <div className="max-w-3xl mb-8 md:mb-10">
+          <span className="text-xs font-mono uppercase tracking-widest text-accent font-bold block mb-2">
+            Ask Fermor
+          </span>
           <h2 className="text-display-lg font-serif text-ink tracking-tight uppercase leading-tight">
-            Ask Fermor. <br />
-            <span className="italic font-normal lowercase tracking-normal">Structured answers</span> without black boxes.
+            Real questions. <br />
+            <span className="italic font-normal lowercase tracking-normal text-accent">Clear reasoning.</span>
           </h2>
-          <p className="mt-3 text-base md:text-lg text-ink font-normal leading-relaxed">
-            No conversational chatbot or streaming guesses. A deterministic decision model evaluating
-            your true monthly commitments, reducing-balance interest, and realistic liquidity boundaries.
+          <p className="mt-4 text-base md:text-lg text-ink font-normal leading-relaxed">
+            No conversational chatbot guessing answers. Fermor audits your true cashflow commitments,
+            evaluates debt strain, and demonstrates the exact levers that change the outcome.
           </p>
 
-          {/* Scenario Chips */}
-          <div className="mt-5 flex flex-wrap gap-2.5 items-center">
-            <span className="text-xs font-mono text-ink font-semibold uppercase mr-1">Preload scenario:</span>
-            {SCENARIO_PRESETS.map((preset) => (
+          {/* Quick Real Questions Chips */}
+          <div className="mt-6 flex flex-wrap gap-2.5 items-center">
+            <span className="text-xs font-mono text-ink font-bold uppercase mr-1">Choose a question:</span>
+            {PRESET_QUESTIONS.map((sc) => (
               <button
-                key={preset.id}
+                key={sc.id}
                 type="button"
-                onClick={() => applyPreset(preset.id)}
-                className={`text-xs font-mono px-3.5 py-1.5 rounded-sm border transition-colors ${
-                  activePreset === preset.id
-                    ? 'bg-accent text-bg border-accent font-semibold shadow-xs'
+                onClick={() => applyScenario(sc.id)}
+                className={`text-xs font-mono px-3.5 py-1.5 rounded-sm border transition-all ${
+                  activeScenarioId === sc.id
+                    ? 'bg-accent text-bg border-accent font-bold shadow-xs'
                     : 'bg-bg-white text-ink border-border hover:border-ink font-medium'
                 }`}
               >
-                {preset.label}
+                {sc.question}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Two-Column Structured Worksheet */}
+        {/* Structured Two-Column Breakdown */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Left Column: Live Inputs Worksheet */}
+          {/* Left Column: The Financial Breakdown Worksheet */}
           <div className="lg:col-span-6 bg-bg-white border border-border p-6 sm:p-8 rounded-md shadow-sm space-y-6">
             <div className="flex justify-between items-center pb-4 border-b border-border/80">
-              <span className="text-xs font-mono uppercase tracking-wider text-ink font-medium">
-                Decision Inputs
+              <span className="text-xs font-mono uppercase tracking-wider text-ink font-bold">
+                The Financial Breakdown
               </span>
-              <span className="text-xs font-mono text-ink-faint">
-                Live recalculation
+              <span className="text-xs font-mono text-ink-muted">
+                {formatPercent(rate, 1)} reducing rate &bull; {tenureYears} yrs
               </span>
             </div>
 
-            {/* Monthly Income */}
+            {/* Income Slider */}
             <Slider
               id="ask-income"
               label="Net Monthly In-Hand Income"
               min={30000}
-              max={400000}
+              max={300000}
               step={5000}
               value={income}
               onChange={setIncome}
@@ -119,148 +174,76 @@ export function AskFermor() {
             {/* Existing Obligations */}
             <Slider
               id="ask-commitments"
-              label="Existing Commitments (Rent, Current EMIs, PF)"
+              label="Existing Commitments (Rent, Loans, Cards)"
               min={0}
-              max={150000}
+              max={100000}
               step={2000}
               value={commitments}
               onChange={setCommitments}
               formatValue={(v) => formatINR(v)}
             />
 
-            {/* Asset Price */}
+            {/* Price Slider */}
             <Slider
               id="ask-price"
-              label="Asset Price / Total Purchase Target"
-              min={200000}
-              max={15000000}
+              label={PRESET_QUESTIONS.find((p) => p.id === activeScenarioId)?.assetLabel || 'Total Asset Price'}
+              min={Math.round(assetPrice * 0.5)}
+              max={Math.round(assetPrice * 1.8)}
               step={50000}
               value={assetPrice}
-              onChange={(p) => {
-                setAssetPrice(p);
-                if (downPayment >= p) setDownPayment(Math.round(p * 0.2));
+              onChange={(v) => {
+                setAssetPrice(v);
+                if (downPayment >= v) setDownPayment(Math.round(v * 0.2));
               }}
               formatValue={(v) => formatINR(v, { compact: true })}
             />
 
-            {/* Down Payment */}
+            {/* Down Payment Slider */}
             <Slider
               id="ask-down"
               label="Upfront Down Payment"
               min={0}
-              max={assetPrice}
+              max={Math.round(assetPrice * 0.6)}
               step={25000}
               value={downPayment}
               onChange={setDownPayment}
               formatValue={(v) => formatINR(v, { compact: true })}
-              hint={`Financed loan principal: ${formatINR(principal, { compact: true })}`}
             />
-
-            {/* Grid for Rate and Tenure */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-border/80">
-              <Slider
-                id="ask-rate"
-                label="Interest Rate"
-                min={0.07}
-                max={0.16}
-                step={0.0025}
-                value={rate}
-                onChange={setRate}
-                formatValue={(v) => formatPercent(v, 2)}
-              />
-              <Slider
-                id="ask-tenure"
-                label="Loan Tenure"
-                min={1}
-                max={30}
-                step={1}
-                value={tenureYears}
-                onChange={setTenureYears}
-                formatValue={(v) => `${v} years`}
-              />
-            </div>
           </div>
 
-          {/* Right Column: Typographic Bank-Statement Style Ledger Answer */}
-          <div className="lg:col-span-6 bg-bg-white border border-border p-6 sm:p-8 rounded-md shadow-sm">
-            <div className="flex items-center justify-between pb-3.5 border-b border-border/80">
-              <div>
-                <span className="text-xs font-mono uppercase tracking-wider text-accent font-semibold block">
-                  The Honest Ledger
-                </span>
-                <span className="text-xs text-ink-muted font-medium">
-                  Auditing full obligation solvency
-                </span>
+          {/* Right Column: Fermor's Reasoning & Decision Verdict */}
+          <div className="lg:col-span-6 bg-bg-white border border-border p-6 sm:p-8 rounded-md shadow-sm space-y-6">
+            
+            <div className="pb-4 border-b border-border/80 flex items-center justify-between">
+              <span className="text-xs font-mono uppercase tracking-wider text-accent font-bold">
+                Fermor’s Reasoning
+              </span>
+              <span className="text-xs font-mono text-ink-muted">
+                Audit Results
+              </span>
+            </div>
+
+            {/* Structured Numbers Ledger */}
+            <div className="divide-y divide-border/70 text-sm font-mono">
+              <div className="py-2.5 flex justify-between items-baseline">
+                <span className="text-ink-muted">Monthly in-hand income</span>
+                <span className="text-ink font-bold">{formatINR(income)}</span>
               </div>
-              <div className="text-right">
-                <span className="text-xs font-mono uppercase text-ink font-semibold block">Principal</span>
-                <span className="text-xs font-mono font-bold text-ink">
-                  {formatINR(principal, { compact: true })}
-                </span>
+              <div className="py-2.5 flex justify-between items-baseline">
+                <span className="text-ink-muted">Existing commitments</span>
+                <span className="text-ink font-bold">{formatINR(commitments)}</span>
+              </div>
+              <div className="py-2.5 flex justify-between items-baseline">
+                <span className="text-ink-muted">Proposed EMI</span>
+                <span className="text-accent font-bold text-base">{formatINR(emiResult.monthlyEMI)}</span>
+              </div>
+              <div className="py-3 flex justify-between items-baseline border-t-2 border-border text-base">
+                <span className="text-ink font-bold">Total Monthly Debt Service</span>
+                <span className="text-ink font-bold">{formatINR(totalMonthlyDebt)}</span>
               </div>
             </div>
 
-            {/* Primary Calculated Figures (Ruled lines) */}
-            <div className="divide-y divide-border/80 my-5 text-sm">
-              
-              <div className="py-3 flex justify-between items-baseline">
-                <span className="text-ink font-medium">Standalone Monthly EMI</span>
-                <div className="text-right font-mono font-semibold text-ink tabular-nums">
-                  <AnimatedNumber
-                    value={emiResult.monthlyEMI}
-                    formatter={(v) => formatINR(v)}
-                    className="text-lg text-ink font-bold"
-                  />
-                  <span className="block text-xs text-ink-muted font-medium">
-                    {formatPercent(emiShareOfIncome)} of income
-                  </span>
-                </div>
-              </div>
-
-              <div className="py-3 flex justify-between items-baseline">
-                <div>
-                  <span className="text-ink font-semibold">Total Monthly Debt Service</span>
-                  <span className="block text-xs text-ink-muted font-medium">
-                    EMI + existing commitments ({formatINR(commitments)})
-                  </span>
-                </div>
-                <div className="text-right font-mono tabular-nums">
-                  <AnimatedNumber
-                    value={totalMonthlyDebt}
-                    formatter={(v) => formatINR(v)}
-                    className="text-xl text-ink font-bold"
-                  />
-                  <span
-                    className={`block text-xs font-bold ${
-                      isStretched
-                        ? 'text-red-900'
-                        : isHealthy
-                        ? 'text-accent'
-                        : 'text-amber-950'
-                    }`}
-                  >
-                    {formatPercent(totalDebtShareOfIncome)} of monthly income
-                  </span>
-                </div>
-              </div>
-
-              <div className="py-3 flex justify-between items-baseline">
-                <span className="text-ink font-medium">Total Interest Paid over {tenureYears} yrs</span>
-                <span className="font-mono text-red-900 font-bold tabular-nums">
-                  {formatINR(emiResult.totalInterest, { compact: true })}
-                </span>
-              </div>
-
-              <div className="py-3 flex justify-between items-baseline">
-                <span className="text-ink font-medium">Total Outlay (Principal + Interest)</span>
-                <span className="font-mono text-ink font-bold tabular-nums">
-                  {formatINR(emiResult.totalRepayment, { compact: true })}
-                </span>
-              </div>
-
-            </div>
-
-            {/* The Honest Insight Callout (40-50% rule of thumb) */}
+            {/* The Decision Verdict Block */}
             <div
               className={`p-4 rounded-sm border ${
                 isStretched
@@ -293,61 +276,78 @@ export function AskFermor() {
                 </span>
               </div>
 
-              <p className="text-sm font-sans text-ink leading-relaxed font-normal">
-                {isStretched ? (
-                  <>
-                    Standalone EMI (<strong className="font-semibold text-ink">{formatPercent(emiShareOfIncome)}</strong>) appears deceptively affordable, but
-                    your total fixed outlays reach <strong className="font-bold text-red-950 bg-red-100/90 px-1 py-0.5 rounded border border-red-200">{formatPercent(totalDebtShareOfIncome)}</strong>.
-                    Many financial planners and prudent lenders consider debt servicing above 40–50% of income as stretched,
-                    severely restricting your ability to invest or absorb sudden emergencies.
-                  </>
-                ) : (
-                  <>
-                    Your total monthly debt service sits at <strong className="font-bold text-accent bg-accent/15 px-1 py-0.5 rounded border border-accent/20">{formatPercent(totalDebtShareOfIncome)}</strong>{' '}
-                    of your in-hand income, remaining well inside the standard 40% prudent guideline.
-                  </>
+              <p className="text-sm font-sans text-ink leading-relaxed">
+                That proposed EMI would be <strong className="font-bold text-ink">{emiShareOfIncome.toFixed(1)}%</strong> of your monthly income.
+                Together with existing commitments, your fixed debt service reaches{' '}
+                <strong className={`font-bold ${isStretched ? 'text-red-950 bg-red-100/90 px-1 py-0.5 rounded' : 'text-accent'}`}>
+                  {totalDebtShareOfIncome.toFixed(1)}%
+                </strong>.
+                {isStretched && (
+                  <span> Prudent retail lenders consider debt servicing above 40–50% as stretched, leaving you only {formatINR(remainingCashflow)} for living expenses, investing, and emergencies.</span>
+                )}
+                {isHealthy && (
+                  <span> Well within standard 35% safe limits, leaving you healthy cashflow to invest and build an emergency buffer.</span>
                 )}
               </p>
-              <p className="mt-2.5 text-xs font-sans text-ink font-medium">
-                Note: 40–50% is a common benchmark rule of thumb across retail lenders, not a rigid verdict.
-              </p>
             </div>
 
-            {/* "What changes if" line */}
-            <div className="mt-4 p-3.5 bg-bg-subtle rounded-sm border border-border flex items-start justify-between gap-3 text-xs">
-              <div className="space-y-0.5">
-                <span className="font-mono text-ink uppercase text-[11px] font-semibold block">
-                  Sensitivity Leverage
-                </span>
-                <span className="text-ink font-medium text-sm font-sans">
-                  Adding {formatINR(alternateDownPayment - downPayment, { compact: true })} more down saves{' '}
-                  <strong className="text-accent font-semibold">{formatINR(interestSavedWithExtraDown, { compact: true })}</strong> in total interest.
-                </span>
+            {/* The Actionable Lever: What changes if you put extra down */}
+            <div className="p-4 bg-bg-subtle rounded border border-border space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <span className="font-mono text-ink uppercase text-xs font-bold block mb-1">
+                    The Financial Lever
+                  </span>
+                  <p className="text-xs sm:text-sm font-sans text-ink leading-relaxed">
+                    Here’s what changes if you put {formatINR(extraDownAmount, { compact: true })} more down:
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setHasAppliedExtraDown(!hasAppliedExtraDown)}
+                  className={`shrink-0 text-xs font-mono px-3 py-1.5 rounded-sm border transition-all ${
+                    hasAppliedExtraDown
+                      ? 'bg-accent text-bg border-accent font-bold'
+                      : 'bg-bg-white text-ink border-border hover:border-ink font-semibold'
+                  }`}
+                >
+                  {hasAppliedExtraDown ? '[ Reset Down Payment ]' : '[ See the difference ]'}
+                </button>
               </div>
-              <span className="font-mono text-accent text-right font-semibold shrink-0">
-                EMI: {formatINR(alternateResult.monthlyEMI)}
-              </span>
+
+              {hasAppliedExtraDown && (
+                <div className="pt-3 border-t border-border/70 grid grid-cols-2 gap-3 text-xs font-mono animate-fadeIn">
+                  <div>
+                    <span className="text-ink-muted block text-[11px]">Monthly EMI Drops By:</span>
+                    <span className="text-accent font-bold text-sm">-{formatINR(monthlySavings)} / mo</span>
+                  </div>
+                  <div>
+                    <span className="text-ink-muted block text-[11px]">Total Interest Saved:</span>
+                    <span className="text-accent font-bold text-sm">+{formatINR(interestSaved, { compact: true })}</span>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* "See the math" expander */}
-            <div className="mt-4 pt-3 border-t border-border/80">
+            {/* Progressive Math Breakdown */}
+            <div className="pt-2 border-t border-border/70">
               <button
                 type="button"
                 onClick={() => setShowMath(!showMath)}
-                className="text-xs font-mono text-ink font-semibold hover:text-accent flex items-center justify-between w-full"
+                className="text-xs font-mono text-ink font-semibold hover:text-accent flex items-center justify-between w-full focus:outline-none transition-colors"
               >
-                <span>{showMath ? '[- Close formula breakdown]' : '[+ See the EMI math]'}</span>
-                <span className="text-xs text-ink-muted font-normal">Indicative &bull; Not investment advice</span>
+                <span>{showMath ? '[- Hide formula breakdown]' : '[+ See the EMI math breakdown]'}</span>
+                <span className="text-xs text-ink-muted font-normal">Reducing balance amortisation</span>
               </button>
 
               {showMath && (
-                <div className="mt-3 p-3.5 bg-bg-subtle border border-border/80 rounded text-xs font-mono text-ink space-y-2">
+                <div className="mt-3 p-3.5 bg-bg-subtle border border-border/80 rounded text-xs font-mono text-ink space-y-2 animate-fadeIn">
                   <p className="font-semibold">EMI = P &times; r &times; (1 + r)^n / ((1 + r)^n - 1)</p>
                   <p className="text-ink-muted">
-                    Where P = <strong className="text-ink">{formatINR(principal)}</strong>, r = <strong className="text-ink">{formatPercent(rate)} / 12</strong>, n = <strong className="text-ink">{tenureYears * 12} months</strong>.
+                    Where P = <strong className="text-ink">{formatINR(principal)}</strong>, r = <strong className="text-ink">{formatPercent(rate, 2)} / 12</strong>, n = <strong className="text-ink">{tenureYears * 12} monthly installments</strong>.
                   </p>
-                  <p className="text-xs text-ink-muted">
-                    Projections are purely educational and illustrate standard reducing balance schedules.
+                  <p className="text-[11px] text-ink-muted">
+                    Fermor uses exact day-count reducing balance schedules without hidden processing fees or front-loaded interest penalties.
                   </p>
                 </div>
               )}

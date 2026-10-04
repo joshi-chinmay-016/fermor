@@ -11,12 +11,12 @@ import { MathDisclosure } from './MathDisclosure';
 
 export function FutureSimulator() {
   // Baseline initial values (for the Ghost line)
-  const baselineMonthly = ASSUMPTIONS.SIMULATOR_DEFAULT_MONTHLY;
-  const baselineReturn = ASSUMPTIONS.SIMULATOR_DEFAULT_RETURN;
-  const baselineYears = ASSUMPTIONS.SIMULATOR_DEFAULT_YEARS;
+  const baselineMonthly = 5000;
+  const baselineReturn = 0.12;
+  const baselineYears = 10;
 
   // Active state variables
-  const [monthly, setMonthly] = useState<number>(baselineMonthly);
+  const [monthly, setMonthly] = useState<number>(15000);
   const [annualReturn, setAnnualReturn] = useState<number>(baselineReturn);
   const [years, setYears] = useState<number>(baselineYears);
   const [delayYears, setDelayYears] = useState<number>(0);
@@ -78,44 +78,37 @@ export function FutureSimulator() {
   // Delta against initial baseline
   const deltaValue = activeResult.futureValue - baselineResult.futureValue;
   const deltaFormatted = useMemo(() => {
-    if (Math.abs(deltaValue) < 10000) return null;
+    if (Math.abs(deltaValue) < 1000) return 'Identical to baseline';
     return `${deltaValue > 0 ? '+' : ''}${formatINR(deltaValue, { compact: true })}`;
   }, [deltaValue]);
 
-  // Thoughtful generated insight written like a person
+  // Thoughtful generated insight written like a person focusing on the difference
   const generatedInsight = useMemo(() => {
     if (delayYears > 0) {
-      return `Waiting ${formatYears(delayYears)} costs you about ${formatINR(
+      return `Waiting ${formatYears(delayYears)} costs you ${formatINR(
         delayAnalysis.costOfDelay,
         { compact: true }
-      )} in lost wealth, of which ${formatINR(delayAnalysis.lostCompounding, {
-        compact: true,
-      })} is pure compounded momentum you can never make back with effort alone.`;
+      )} at maturity. Missed contributions only saved you ${formatINR(delayAnalysis.missedContributions, { compact: true })}, but ${formatINR(delayAnalysis.lostCompounding, { compact: true })} vanished in lost compounding momentum.`;
     }
 
     if (inflationAdjusted) {
-      return `At ${formatPercent(inflationRate)} assumed inflation, ${formatINR(
-        activeResult.futureValue,
-        { compact: true }
-      )} in ${years} years has the exact purchasing power of ${formatINR(
-        activeResult.futureValue,
-        { compact: true }
-      )} today. Real growth is what beats the basket.`;
-    }
-
-    if (activeResult.totalGains > activeResult.investedAmount * 2) {
-      const multiple = (activeResult.totalGains / activeResult.investedAmount).toFixed(1);
-      return `At ${formatPercent(annualReturn)} over ${years} years, market growth creates ${multiple}x more money than your physical deposits (${formatINR(
-        activeResult.investedAmount,
-        { compact: true }
-      )} deposited vs ${formatINR(activeResult.totalGains, { compact: true })} earned).`;
+      return `At ${formatPercent(inflationRate)} inflation, ₹${formatINR(activeResult.futureValue, { compact: true })} in ${years} years will purchase what ₹${formatINR(activeResult.futureValue, { compact: true })} buys today. Real compounding is about beating purchasing power erosion.`;
     }
 
     if (monthly > baselineMonthly) {
-      return `Adding ${formatINR(monthly - baselineMonthly)} per month lifts your final corpus by ${formatINR(
+      const extraSaved = (monthly - baselineMonthly) * years * 12;
+      const extraGains = Math.max(0, deltaValue - extraSaved);
+      return `Increasing this by ${formatINR(monthly - baselineMonthly)} changes your future by ${formatINR(
         deltaValue,
         { compact: true }
-      )} over ${years} years.`;
+      )}. You only deposited ${formatINR(extraSaved, { compact: true })} more, but compounding handed you ${formatINR(extraGains, { compact: true })} extra.`;
+    }
+
+    if (monthly < baselineMonthly) {
+      return `Dropping your monthly allocation by ${formatINR(baselineMonthly - monthly)} reduces your 10-year future by ${formatINR(
+        Math.abs(deltaValue),
+        { compact: true }
+      )}.`;
     }
 
     return `At ${formatINR(monthly)} a month and ${formatPercent(annualReturn)} return, you accumulate ${formatINR(
@@ -148,105 +141,157 @@ export function FutureSimulator() {
             <span className="italic font-normal lowercase tracking-normal">Change one thing.</span> See what happens.
           </h2>
           <p className="mt-3 text-base md:text-lg text-ink font-normal leading-relaxed max-w-2xl">
-            The dashed line is your baseline benchmark. Adjust your monthly pace, horizon, or start date
-            to watch the divergence compound in real time.
+            You don’t need an opaque spreadsheet. Test how one single adjustment bends your 10-year trajectory.
+            The important moment is the difference.
           </p>
         </div>
 
-        {/* 3-Part Output Dashboard: Final Value, Invested, Gains */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-border border border-border rounded-md overflow-hidden mb-8 shadow-xs">
-          
-          <div className="bg-bg-white p-5 sm:p-6">
-            <span className="text-xs font-mono uppercase tracking-wider text-ink font-semibold block mb-1">
-              {inflationAdjusted ? 'Inflation-Adjusted Corpus' : 'Projected Future Corpus'}
-            </span>
-            <div className="flex items-baseline gap-2">
-              <AnimatedNumber
-                value={activeResult.futureValue}
-                formatter={(v) => formatINR(v, { compact: true, decimals: 2 })}
-                className="text-3xl sm:text-4xl font-serif font-medium text-accent"
-              />
+        {/* Experiment Hero Card: Baseline vs New vs The Difference */}
+        <div className="bg-bg-white border border-border rounded-md p-6 sm:p-8 mb-8 shadow-sm">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+            
+            {/* Baseline Reference */}
+            <div className="md:col-span-4 p-4 rounded bg-bg-subtle/80 border border-border">
+              <span className="text-xs font-mono uppercase tracking-wider text-ink-muted font-bold block mb-1">
+                Baseline (Before)
+              </span>
+              <div className="text-sm font-sans text-ink font-medium">
+                {formatINR(baselineMonthly)}/mo &bull; 10 years
+              </div>
+              <div className="text-2xl sm:text-3xl font-serif text-ink font-medium mt-1">
+                {formatINR(baselineResult.futureValue, { compact: true })}
+              </div>
+              <span className="text-[11px] font-mono text-ink-muted block mt-0.5">
+                Invested: {formatINR(baselineResult.investedAmount, { compact: true })}
+              </span>
             </div>
-            <span className="text-xs font-mono text-ink-muted font-medium block mt-1">
-              At Yr {years} horizon ({formatYears(effectiveYears)} active)
-            </span>
-          </div>
 
-          <div className="bg-bg-white p-5 sm:p-6">
-            <span className="text-xs font-mono uppercase tracking-wider text-ink font-semibold block mb-1">
-              Your Capital Outlay
-            </span>
-            <div className="flex items-baseline gap-2">
-              <AnimatedNumber
-                value={activeResult.investedAmount}
-                formatter={(v) => formatINR(v, { compact: true, decimals: 2 })}
-                className="text-3xl sm:text-4xl font-serif font-medium text-ink"
-              />
+            {/* The Difference Highlight (The "Aha!" Moment) */}
+            <div className="md:col-span-4 text-center p-4 rounded border border-accent/30 bg-accent-surface/90 shadow-xs">
+              <span className="text-xs font-mono uppercase tracking-wider text-accent font-bold block mb-1">
+                The Difference
+              </span>
+              <div className="text-3xl sm:text-4xl font-serif font-bold text-accent">
+                {deltaFormatted}
+              </div>
+              <span className="text-xs font-sans text-ink font-medium block mt-1">
+                {deltaValue >= 0 ? 'added to your 10-year future' : 'reduction in your future'}
+              </span>
             </div>
-            <span className="text-xs font-mono text-ink-muted font-medium block mt-1">
-              {formatINR(monthly)} &times; {effectiveYears * 12} contributions
-            </span>
-          </div>
 
-          <div className="bg-bg-white p-5 sm:p-6">
-            <span className="text-xs font-mono uppercase tracking-wider text-ink font-semibold block mb-1">
-              Compounded Earnings (The Gap)
-            </span>
-            <div className="flex items-baseline gap-2">
-              <AnimatedNumber
-                value={activeResult.totalGains}
-                formatter={(v) => `+${formatINR(v, { compact: true, decimals: 2 })}`}
-                className="text-3xl sm:text-4xl font-serif font-medium text-accent"
-              />
+            {/* Active Adjusted Outcome */}
+            <div className="md:col-span-4 p-4 rounded bg-bg-subtle/80 border border-border md:text-right">
+              <span className="text-xs font-mono uppercase tracking-wider text-accent font-bold block mb-1">
+                10 Years from Now
+              </span>
+              <div className="text-sm font-sans text-ink font-medium">
+                {formatINR(monthly)}/mo {delayYears > 0 ? `(wait ${delayYears}y)` : ''}
+              </div>
+              <div className="text-2xl sm:text-3xl font-serif text-accent font-medium mt-1">
+                <AnimatedNumber
+                  value={activeResult.futureValue}
+                  formatter={(v) => formatINR(v, { compact: true, decimals: 2 })}
+                />
+              </div>
+              <span className="text-[11px] font-mono text-ink-muted block mt-0.5">
+                Outlay: {formatINR(activeResult.investedAmount, { compact: true })}
+              </span>
             </div>
-            <span className="text-xs font-mono text-accent font-semibold block mt-1">
-              Wealth generated by time &amp; return
-            </span>
-          </div>
 
+          </div>
         </div>
 
-        {/* Main Work Area: Multi-variable Controls & Ghost Chart */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+        {/* Main Work Area: Single Major Dial & Levers + Chart */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* Controls Column */}
           <div className="lg:col-span-5 space-y-6 bg-bg-white border border-border p-6 sm:p-8 rounded-md shadow-sm">
             <div className="flex justify-between items-center pb-4 border-b border-border/80">
-              <span className="text-xs font-mono uppercase tracking-wider text-ink font-medium">
-                Simulation Variables
+              <span className="text-xs font-mono uppercase tracking-wider text-ink font-bold">
+                Change One Assumption
               </span>
               <button
                 type="button"
                 onClick={() => {
-                  setMonthly(baselineMonthly);
+                  setMonthly(15000);
                   setAnnualReturn(baselineReturn);
                   setYears(baselineYears);
                   setDelayYears(0);
                   setInflationAdjusted(false);
                 }}
-                className="text-xs font-mono text-accent hover:underline"
+                className="text-xs font-mono text-accent hover:underline font-semibold"
               >
-                Reset to baseline
+                Reset experiment
               </button>
             </div>
 
-            {/* Monthly Investment Slider */}
-            <Slider
-              id="sim-monthly"
-              label="Monthly Investment"
-              min={2000}
-              max={150000}
-              step={1000}
-              value={monthly}
-              onChange={setMonthly}
-              formatValue={(v) => formatINR(v)}
-              ticks={[
-                { value: 10000, label: '10k' },
-                { value: 25000, label: '25k' },
-                { value: 50000, label: '50k' },
-                { value: 100000, label: '1L' },
-              ]}
-            />
+            {/* Primary Slider: Monthly Pace */}
+            <div>
+              <Slider
+                id="sim-monthly"
+                label="Monthly Investment"
+                min={2000}
+                max={50000}
+                step={1000}
+                value={monthly}
+                onChange={setMonthly}
+                formatValue={(v) => formatINR(v)}
+                ticks={[
+                  { value: 5000, label: '5k' },
+                  { value: 15000, label: '15k' },
+                  { value: 25000, label: '25k' },
+                  { value: 50000, label: '50k' },
+                ]}
+              />
+              <span className="text-xs font-sans text-ink-muted block mt-2">
+                Slide to watch the difference update instantly compared to your ₹5,000 baseline.
+              </span>
+            </div>
+
+            {/* Quick One-Click Levers */}
+            <div className="pt-4 border-t border-border/70 space-y-2.5">
+              <span className="text-xs font-mono uppercase tracking-wider text-ink font-bold block">
+                Quick What-If Experiments:
+              </span>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setMonthly((prev) => Math.min(50000, prev + 5000))}
+                  className="text-xs font-mono px-3 py-1.5 rounded-sm border border-border bg-bg-subtle text-ink hover:border-ink transition-colors font-medium"
+                >
+                  +₹5,000/mo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMonthly((prev) => Math.min(50000, prev + 10000))}
+                  className="text-xs font-mono px-3 py-1.5 rounded-sm border border-border bg-bg-subtle text-ink hover:border-ink transition-colors font-medium"
+                >
+                  +₹10,000/mo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDelayYears((prev) => (prev === 2 ? 0 : 2))}
+                  className={`text-xs font-mono px-3 py-1.5 rounded-sm border transition-colors font-medium ${
+                    delayYears === 2
+                      ? 'bg-red-50 text-red-950 border-red-300 font-bold'
+                      : 'border-border bg-bg-subtle text-ink hover:border-ink'
+                  }`}
+                >
+                  {delayYears === 2 ? 'Delay: 2 yrs active' : 'What if I wait 2 yrs?'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInflationAdjusted(!inflationAdjusted)}
+                  className={`text-xs font-mono px-3 py-1.5 rounded-sm border transition-colors font-medium ${
+                    inflationAdjusted
+                      ? 'bg-accent text-bg border-accent font-bold'
+                      : 'border-border bg-bg-subtle text-ink hover:border-ink'
+                  }`}
+                >
+                  {inflationAdjusted ? 'Inflation (6% Real)' : 'Adjust 6% inflation'}
+                </button>
+              </div>
+            </div>
 
             {/* Expected Return Slider */}
             <Slider

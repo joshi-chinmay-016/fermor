@@ -136,6 +136,7 @@ function NodeIcon({ type, isActive }: { type: NodeItem['iconType']; isActive: bo
 
 export function MoneyMap() {
   const [activeId, setActiveId] = useState<string>('investments');
+  const [showFormula, setShowFormula] = useState<boolean>(false);
 
   const activeNode = NODES.find((n) => n.id === activeId) || NODES[0];
   const center = { cx: 340, cy: 215 };
@@ -144,15 +145,19 @@ export function MoneyMap() {
     <section id="money-map" className="py-12 md:py-16 bg-bg-subtle border-b border-border">
       <div className="max-w-container mx-auto px-4 sm:px-6 md:px-8">
         
-        {/* Section Header */}
-        <div className="max-w-2xl mb-8 md:mb-10">
+        {/* Integrated Fermor Philosophy Header */}
+        <div className="max-w-3xl mb-10 pb-8 border-b border-border/80">
+          <span className="text-xs font-mono uppercase tracking-widest text-accent font-bold block mb-2">
+            The Fermor Philosophy
+          </span>
           <h2 className="text-display-lg font-serif text-ink tracking-tight uppercase leading-tight">
-            Connected by math, <br />
-            <span className="italic font-normal lowercase tracking-normal">not divided</span> into silos.
+            No jargon. No black boxes. <br />
+            <span className="italic font-normal lowercase tracking-normal text-accent">Just the math.</span>
           </h2>
-          <p className="mt-3 text-base md:text-lg text-ink font-normal leading-relaxed">
-            Every rupee committed to an EMI subtracts from your compounding horizon.
-            Fermor connects your financial nodes into a living, unified picture.
+          <p className="mt-4 text-base md:text-lg text-ink font-normal leading-relaxed">
+            Your money isn’t five isolated buckets. It’s a single connected system.
+            When you take on an EMI, you directly squeeze your compounding horizon. When you optimize tax, you unlock fresh cashflow.
+            Touch any node to see how money flows through your life.
           </p>
         </div>
 
@@ -414,14 +419,24 @@ export function MoneyMap() {
                 </div>
               </div>
 
-              {/* Math / Formula disclosure - Full width, not truncated */}
-              <div className="mt-5 pt-3.5 border-t border-border flex flex-col gap-1.5 text-xs font-mono">
-                <span className="font-semibold text-ink uppercase tracking-wider text-[11px]">
-                  Model Formula:
-                </span>
-                <span className="text-ink font-mono bg-bg-subtle p-2.5 rounded border border-border break-words font-medium leading-relaxed">
-                  {activeNode.formulaNote}
-                </span>
+              {/* Progressive Math / Formula disclosure */}
+              <div className="mt-5 pt-3.5 border-t border-border text-xs font-mono">
+                <button
+                  type="button"
+                  onClick={() => setShowFormula(!showFormula)}
+                  className="w-full flex items-center justify-between text-left font-semibold text-ink hover:text-accent focus:outline-none transition-colors"
+                >
+                  <span className="uppercase tracking-wider text-[11px]">
+                    {showFormula ? '[- Hide formula rule]' : '[+ Inspect underlying formula]'}
+                  </span>
+                  <span className="text-[11px] text-ink-muted font-normal">Deterministic math</span>
+                </button>
+
+                {showFormula && (
+                  <div className="mt-2.5 text-ink font-mono bg-bg-subtle p-2.5 rounded border border-border break-words font-medium leading-relaxed animate-fadeIn">
+                    {activeNode.formulaNote}
+                  </div>
+                )}
               </div>
             </div>
           </div>

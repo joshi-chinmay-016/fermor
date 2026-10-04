@@ -42,3 +42,28 @@ This document details key product design, typographic, mathematical, and interac
 - **The Decision:**
   - Standardized all body text, notes, and metrics inside alert blocks and tool cards to clean, medium-weight `font-sans` (`Geist Sans`).
   - Darkened alert copy and badges to high-contrast ink values (`#11110F` body, `#450A0A` / `text-red-950` alert headings, and high-opacity borders) ensuring crisp, effortless readability across all display types.
+
+## 9. Shifted from "Look What We Calculate" to "Decisions That Cost Us Money"
+- **The Challenge:** A page filled with formulas, abstract CAGR percentages, and corpus metrics feels like a technical math demo rather than an essential consumer product.
+- **The Decision:**
+  - Reframed interaction around the questions people actually ask: *"Can I afford this car?"*, *"Am I investing enough?"*, *"Should I pay off my loan?"*, *"What happens if I wait?"*.
+  - Transformed these questions into 4 interactive decision previews with instant verdicts (e.g. comparing car EMI against safe 20% salary guidelines, computing guaranteed prepayment arbitrage).
+  - Progressive disclosure: All math formulas are hidden behind clean `[ See how we calculated this → ]` disclosures, keeping the primary user focus entirely on *"What does this mean for me?"*.
+
+## 10. Elevated "The Difference" as the Heroic Moment in Move the Future
+- **The Challenge:** Multi-slider calculators overwhelm users with parameters instead of delivering an intuitive "Aha!" realization.
+- **The Decision:**
+  - Grounded "Move the Future" in a clean experiment: Baseline (₹5,000/mo → ₹11.6L) vs New (₹15,000/mo → ₹34.8L).
+  - Centered the visual hierarchy on **The Difference (+₹23.2L)**. The user immediately understands: *"Increasing my contribution by ₹10,000 adds ₹23.2L to my future — compounding more than doubles my out-of-pocket effort."*
+
+## 11. Consolidated to 7 Intentional Sections
+- **The Challenge:** A sprawling homepage with separate manifesto interludes, article dispatches, and expansive calculator indices creates cognitive bloat.
+- **The Decision:**
+  - Consolidated into exactly 7 intentional sections:
+    1. **Hero**: *"Where is your money taking you?"*
+    2. **Financial Life / Philosophy**: Manifesto integrated with the interactive Capital Flow Topology.
+    3. **Move the Future**: The signature difference experiment.
+    4. **The Questions That Cost Us Money**: 4 tactile decision moments.
+    5. **Ask Fermor**: Real question breakdown (*"I earn ₹80k/mo. Can I afford a ₹12L car?"*) with honest reasoning and down-payment levers.
+    6. **When You Need to Go Deeper**: A visually quiet 6-instrument collection (SIP, EMI, Tax, FD, CAGR, XIRR).
+    7. **Final Action & Regulatory Footnote**: Clean CTA and illustrative disclaimer.

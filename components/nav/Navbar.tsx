@@ -7,11 +7,11 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
-    { label: 'Understand', href: '#money-map' },
-    { label: 'Plan', href: '#simulator' },
-    { label: 'Decide', href: '#ask-fermor' },
-    { label: 'Tools', href: '#questions' },
-    { label: 'Learn', href: '#learn' },
+    { label: 'Philosophy', href: '#money-map' },
+    { label: 'Move the Future', href: '#simulator' },
+    { label: 'Decisions', href: '#questions' },
+    { label: 'Ask Fermor', href: '#ask-fermor' },
+    { label: 'Toolkit', href: '#toolkit' },
   ];
 
   return (

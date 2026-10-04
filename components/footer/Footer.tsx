@@ -47,7 +47,7 @@ export function Footer() {
                 <li><a href="#simulator" className="hover:text-ink font-medium">Annuity Due SIP Math</a></li>
                 <li><a href="#ask-fermor" className="hover:text-ink font-medium">Reducing Balance EMI</a></li>
                 <li><a href="#simulator" className="hover:text-ink font-medium">Inflation Deflator</a></li>
-                <li><a href="#learn" className="hover:text-ink font-medium">Editorial Dispatches</a></li>
+                <li><a href="#toolkit" className="hover:text-ink font-medium">Instrument Ecosystem</a></li>
               </ul>
             </div>
 

@@ -11,6 +11,7 @@ import { Slider } from '../ui/Slider';
 export function Hero() {
   const [monthlyInvestment, setMonthlyInvestment] = useState<number>(ASSUMPTIONS.HERO_DEFAULT_MONTHLY);
   const [hasInteracted, setHasInteracted] = useState(false);
+  const [showCalculation, setShowCalculation] = useState(false);
 
   // Compute live 10-year trajectory at 12% benchmark
   const sipResult = useMemo(() => {
@@ -64,24 +65,29 @@ export function Hero() {
           <div className="lg:col-span-5 flex flex-col justify-between order-2 lg:order-1">
             <div className="bg-bg-white border border-border p-6 sm:p-8 rounded-md shadow-[0_2px_8px_rgba(17,17,15,0.03)]">
               
-              {/* Projected Value Header */}
+              {/* Projected Value Header - Human First */}
               <div className="pb-5 border-b border-border/80">
-                <span className="text-xs uppercase font-mono tracking-wider text-ink font-semibold block mb-1.5">
-                  Ten-Year Projected Corpus
+                <span className="text-xs uppercase font-mono tracking-wider text-ink font-semibold block mb-1">
+                  Ten-Year Future
                 </span>
-                <div className="flex items-baseline gap-2">
+                <div className="flex flex-wrap items-baseline gap-2">
+                  <span className="text-2xl sm:text-3xl font-serif text-ink">You could have</span>
                   <AnimatedNumber
                     value={sipResult.futureValue}
                     formatter={(v) => formatINR(v, { compact: true, decimals: 2 })}
                     className="text-4xl sm:text-5xl font-serif text-accent font-medium tracking-tight"
                   />
+                  <span className="text-2xl sm:text-3xl font-serif text-ink">in 10 years.</span>
                 </div>
-                <div className="mt-2.5 text-xs font-mono text-ink font-medium flex items-center justify-between">
+                <p className="mt-1 text-xs text-ink-muted font-sans">
+                  Assuming {formatINR(monthlyInvestment)}/month at a 12% broad-market benchmark.
+                </p>
+                <div className="mt-3 text-xs font-mono text-ink font-medium flex items-center justify-between pt-2 border-t border-border/50">
                   <span>
-                    Invested: <strong className="font-semibold text-ink">{formatINR(sipResult.investedAmount, { compact: true })}</strong>
+                    Your outlay: <strong className="font-semibold text-ink">{formatINR(sipResult.investedAmount, { compact: true })}</strong>
                   </span>
                   <span className="text-accent font-semibold">
-                    Gains: +{formatINR(sipResult.totalGains, { compact: true })}
+                    Compounded growth: +{formatINR(sipResult.totalGains, { compact: true })}
                   </span>
                 </div>
               </div>
@@ -91,7 +97,7 @@ export function Hero() {
                 <div className="relative">
                   <Slider
                     id="hero-monthly-dial"
-                    label="Monthly Investment"
+                    label="Change Your Monthly Pace"
                     min={1000}
                     max={100000}
                     step={1000}
@@ -113,14 +119,31 @@ export function Hero() {
                       <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                       </svg>
-                      <span>Drag the dial to bend your curve.</span>
+                      <span>Drag to change your pace. See your curve bend.</span>
                     </div>
                   )}
                 </div>
 
-                <div className="mt-5 pt-3.5 border-t border-border/80 text-xs text-ink-muted flex items-center justify-between">
-                  <span className="font-medium">Monthly annuity due</span>
-                  <span className="font-mono text-ink">FV = P &times; [((1+r)^n - 1)/r] &times; (1+r)</span>
+                {/* Progressive Disclosure: How did we calculate this? */}
+                <div className="mt-4 pt-3 border-t border-border/80">
+                  <button
+                    type="button"
+                    onClick={() => setShowCalculation(!showCalculation)}
+                    className="text-xs font-mono text-ink font-semibold hover:text-accent flex items-center justify-between w-full focus:outline-none transition-colors"
+                  >
+                    <span>{showCalculation ? '[- Hide calculation methodology]' : '[ See how we calculated this → ]'}</span>
+                    <span className="text-xs text-ink-muted font-normal">Monthly annuity due</span>
+                  </button>
+
+                  {showCalculation && (
+                    <div className="mt-2.5 p-3 bg-bg-subtle border border-border/80 rounded-sm text-xs font-mono text-ink space-y-1.5 animate-fadeIn">
+                      <p className="font-semibold">FV = P &times; [((1 + r)^n - 1) / r] &times; (1 + r)</p>
+                      <p className="text-ink-muted text-[11px] leading-relaxed">
+                        Where P = {formatINR(monthlyInvestment)}, r = 12% / 12 (1.0% per month), n = 120 monthly cycles.
+                        Compound interest credited at the beginning of each period.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
